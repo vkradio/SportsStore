@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,9 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ServerApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace ServerApp
 {
@@ -21,17 +25,20 @@ namespace ServerApp
 
         public IConfiguration Configuration { get; }
 
+
         // This method gets called by the runtime. Use this method to add services to the container.
-#pragma warning disable CA1822 // Mark members as static
+        [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration["ConnectionStrings:DefaultConnection"];
+
+            services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+
             services.AddControllersWithViews();
         }
-#pragma warning restore CA1822 // Mark members as static
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-#pragma warning disable CA1822 // Mark members as static
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services)
         {
             if (env.IsDevelopment())
             {
@@ -70,7 +77,8 @@ namespace ServerApp
                     spa.UseAngularCliServer("start");
                 }
             });
+
+            SeedData.SeedDatabase(services.GetRequiredService<DataContext>());
         }
-#pragma warning restore CA1822 // Mark members as static
     }
 }
