@@ -1,5 +1,5 @@
-import { Supplier } from "./supplier.model";
-import { Rating } from "./rating.model";
+import { Supplier } from './supplier.model';
+import { Rating } from './rating.model';
 
 export class Product {
   constructor(

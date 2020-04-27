@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Repository } from "./models/repository";
-import { Product } from "./models/product.model";
+import { Repository } from './models/repository';
+import { Product } from './models/product.model';
 
 @Component({
   selector: 'app-root',
@@ -13,5 +13,9 @@ export class AppComponent {
 
   get product(): Product {
     return this.repo.product;
+  }
+
+  get products(): Product[] {
+    return this.repo.products;
   }
 }

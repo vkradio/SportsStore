@@ -1,5 +1,4 @@
-﻿using Ardalis.GuardClauses;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ServerApp.Migrations
 {
@@ -7,17 +6,15 @@ namespace ServerApp.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            Guard.Against.Null(migrationBuilder, nameof(migrationBuilder));
-
             migrationBuilder.CreateTable(
                 name: "Suppliers",
                 columns: table => new
                 {
                     SupplierId = table.Column<long>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    City = table.Column<string>(nullable: true),
-                    State = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: false),
+                    City = table.Column<string>(nullable: false),
+                    State = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,9 +27,9 @@ namespace ServerApp.Migrations
                 {
                     ProductId = table.Column<long>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Category = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: false),
+                    Category = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: false),
                     Price = table.Column<decimal>(type: "decimal(8, 2)", nullable: false),
                     SupplierId = table.Column<long>(nullable: false)
                 },
@@ -80,8 +77,6 @@ namespace ServerApp.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            Guard.Against.Null(migrationBuilder, nameof(migrationBuilder));
-
             migrationBuilder.DropTable(
                 name: "Ratings");
 

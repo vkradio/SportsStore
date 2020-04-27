@@ -9,10 +9,10 @@ namespace ServerApp.Models
     {
         public long SupplierId { get; set; }
 
-        public string? Name { get; set; }
-        public string? City { get; set; }
-        public string? State { get; set; }
+        public string Name { get; set; } = default!;
+        public string City { get; set; } = default!;
+        public string State { get; set; } = default!;
 
-        public IEnumerable<Product> Products { get; } = default!;
+        public IEnumerable<Product> Products { get; set; } = default!;
     }
 }

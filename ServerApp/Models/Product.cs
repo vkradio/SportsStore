@@ -10,9 +10,9 @@ namespace ServerApp.Models
     {
         public long ProductId { get; set; }
 
-        public string? Name { get; set; }
-        public string? Category { get; set; }
-        public string? Description { get; set; }
+        public string Name { get; set; } = default!;
+        public string Category { get; set; } = default!;
+        public string Description { get; set; } = default!;
 
         [Column(TypeName = "decimal(8, 2)")]
         public decimal Price { get; set; }
