@@ -17,7 +17,7 @@ namespace ServerApp.Models
         [Column(TypeName = "decimal(8, 2)")]
         public decimal Price { get; set; }
 
-        public Supplier Supplier { get; set; } = default!;
+        public Supplier? Supplier { get; set; }
 #pragma warning disable CA2227 // Collection properties should be read only
         public List<Rating> Ratings { get; set; } = default!;
 #pragma warning restore CA2227 // Collection properties should be read only

@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using ServerApp.Models;
 using System;
@@ -32,7 +35,8 @@ namespace ServerApp
 
             services
                 .AddControllersWithViews()
-                .AddJsonOptions(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; });
+                .AddJsonOptions(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; })
+                .AddNewtonsoftJson();
 
             services.AddSwaggerGen(options =>
             {

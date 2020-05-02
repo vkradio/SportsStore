@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Ardalis.GuardClauses;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ServerApp.Migrations
 {
@@ -6,6 +7,8 @@ namespace ServerApp.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            Guard.Against.Null(migrationBuilder, nameof(migrationBuilder));
+
             migrationBuilder.CreateTable(
                 name: "Suppliers",
                 columns: table => new
@@ -31,7 +34,7 @@ namespace ServerApp.Migrations
                     Category = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: false),
                     Price = table.Column<decimal>(type: "decimal(8, 2)", nullable: false),
-                    SupplierId = table.Column<long>(nullable: false)
+                    SupplierId = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -41,7 +44,7 @@ namespace ServerApp.Migrations
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +80,8 @@ namespace ServerApp.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            Guard.Against.Null(migrationBuilder, nameof(migrationBuilder));
+
             migrationBuilder.DropTable(
                 name: "Ratings");
 

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using ServerApp.Models;
+using ServerApp.Models.BindingTargets;
 
 namespace ServerApp.Controllers
 {
@@ -22,7 +24,8 @@ namespace ServerApp.Controllers
         {
             var product = context
                 .Products
-                .Include(p => p.Supplier).ThenInclude(s => s.Products)
+                .Include(p => p.Supplier!) // See https://docs.microsoft.com/en-us/ef/core/miscellaneous/nullable-reference-types#navigating-and-including-nullable-relationships
+                    .ThenInclude(s => s.Products)
                 .Include(p => p.Ratings)
                 .FirstOrDefault(p => p.ProductId == id);
 
@@ -96,6 +99,76 @@ namespace ServerApp.Controllers
             else
             {
                 return clientQuery;
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CreateProduct([FromBody] ProductData pData)
+        {
+            if (ModelState.IsValid)
+            {
+                Guard.Against.Null(pData, nameof(pData));
+
+                var product = pData.GetProduct();
+
+                if (product.Supplier != null && product.Supplier.SupplierId != 0)
+                    context.Attach(product.Supplier);
+
+                context.Add(product);
+
+                context.SaveChanges();
+
+                return Ok(product.ProductId);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult ReplaceProduct(long id, [FromBody] ProductData pdata)
+        {
+            if (ModelState.IsValid)
+            {
+                Guard.Against.Null(pdata, nameof(pdata));
+
+                var product = pdata.GetProduct();
+                product.ProductId = id;
+                if (product.Supplier != null && product.Supplier.SupplierId != 0)
+                    context.Attach(product.Supplier);
+                context.Update(product);
+                context.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult UpdateProduct(long id, [FromBody] JsonPatchDocument<ProductData> patch)
+        {
+            var product = context
+                .Products
+                .Include(p => p.Supplier)
+                .First(p => p.ProductId == id);
+            var pdata = new ProductData();
+            pdata.SetProduct(product);
+
+            patch.ApplyTo(pdata, ModelState);
+
+            if (ModelState.IsValid && TryValidateModel(pdata))
+            {
+                if (product.Supplier != null && product.Supplier.SupplierId != 0)
+                    context.Attach(product.Supplier);
+                context.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState);
             }
         }
     }
