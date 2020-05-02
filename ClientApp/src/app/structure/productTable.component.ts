@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Repository } from '../models/repository';
 import { Product } from '../models/product.model';
 
@@ -7,7 +8,9 @@ import { Product } from '../models/product.model';
   templateUrl: './productTable.component.html'
 })
 export class ProductTableComponent {
-  constructor(private repo: Repository) { }
+  constructor(
+    private repo: Repository,
+    private router: Router) { }
 
   get products() {
     return this.repo.products;
@@ -15,5 +18,6 @@ export class ProductTableComponent {
 
   selectProduct(id: number) {
     this.repo.getProduct(id);
+    this.router.navigateByUrl('/detail');
   }
 }
