@@ -2,7 +2,7 @@ import { Product } from './product.model';
 import { Supplier } from './supplier.model';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Filter } from './configClasses.repository';
+import { Filter, Pagination } from './configClasses.repository';
 
 const productsUrl = '/api/products';
 const suppliersUrl = '/api/suppliers';
@@ -19,6 +19,7 @@ export class Repository {
   suppliers: Supplier[] = [];
   filter = new Filter();
   categories: string[] = [];
+  paginationObject = new Pagination();
 
   constructor(private http: HttpClient) {
     this.filter.related = true;
