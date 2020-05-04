@@ -19,11 +19,23 @@ namespace ServerApp.Controllers
 
         public ProductValuesController(DataContext ctx) => context = ctx;
 
+        IActionResult CreateMetadata(IEnumerable<Product> products) => Ok(new
+        {
+            data = products,
+            categories = context
+                .Products
+                .AsNoTracking()
+                .Select(p => p.Category)
+                .Distinct()
+                .OrderBy(c => c)
+        });
+
         [HttpGet("{id}")]
         public Product? GetProduct(long id)
         {
             var product = context
                 .Products
+                .AsNoTracking()
                 .Include(p => p.Supplier!) // See https://docs.microsoft.com/en-us/ef/core/miscellaneous/nullable-reference-types#navigating-and-including-nullable-relationships
                     .ThenInclude(s => s.Products)
                 .Include(p => p.Ratings)
@@ -57,9 +69,9 @@ namespace ServerApp.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Product> GetProducts(string? category, string? search, bool related = false)
+        public IActionResult GetProducts(string? category, string? search, bool related = false, bool metadata = false)
         {
-            IQueryable<Product> serverQuery = context.Products;
+            IQueryable<Product> serverQuery = context.Products.AsNoTracking();
             if (related)
             {
                 serverQuery = serverQuery
@@ -94,11 +106,11 @@ namespace ServerApp.Controllers
                             p.Ratings.ForEach(r => r.Product = null!);
                     });
 
-                return data;
+                return metadata ? CreateMetadata(data) : Ok(data);
             }
             else
             {
-                return clientQuery;
+                return metadata ? CreateMetadata(clientQuery) : Ok(clientQuery);
             }
         }
 

@@ -7,17 +7,21 @@ import { Filter } from './configClasses.repository';
 const productsUrl = '/api/products';
 const suppliersUrl = '/api/suppliers';
 
+interface ProductsMetadata {
+  data: Product[];
+  categories: string[];
+}
+
 @Injectable()
 export class Repository {
   product: Product;
   products: Product[];
   suppliers: Supplier[] = [];
   filter = new Filter();
+  categories: string[] = [];
 
   constructor(private http: HttpClient) {
-    // this.filter.category = 'soccer';
     this.filter.related = true;
-    this.getProducts(true);
   }
 
   getProduct(id: number) {
@@ -36,11 +40,15 @@ export class Repository {
     if (this.filter.search) {
       url += `&search=${this.filter.search}`;
     }
+    url += '&metadata=true';
 
     this
       .http
-      .get<Product[]>(url)
-      .subscribe(prods => this.products = prods);
+      .get<ProductsMetadata>(url)
+      .subscribe(md => {
+        this.products = md.data;
+        this.categories = md.categories;
+      });
   }
 
   getSuppliers() {

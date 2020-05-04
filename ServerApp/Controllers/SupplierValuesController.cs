@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ServerApp.Models;
 using ServerApp.Models.BindingTargets;
 using System;
@@ -17,7 +18,7 @@ namespace ServerApp.Controllers
         public SupplierValuesController(DataContext ctx) => context = ctx;
 
         [HttpGet]
-        public IEnumerable<Supplier> GetSuppliers() => context.Suppliers;
+        public IEnumerable<Supplier> GetSuppliers() => context.Suppliers.AsNoTracking();
 
         [HttpPost]
         public IActionResult CreateSupplier([FromBody] SupplierData sdata)
