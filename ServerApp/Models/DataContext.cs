@@ -15,6 +15,7 @@ namespace ServerApp.Models
         public DbSet<Product> Products { get; set; } = default!;
         public DbSet<Supplier> Suppliers { get; set; } = default!;
         public DbSet<Rating> Ratings { get; set; } = default!;
+        public DbSet<Order> Orders { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
