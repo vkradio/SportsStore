@@ -3,9 +3,11 @@ import { Supplier } from './supplier.model';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Filter, Pagination } from './configClasses.repository';
+import { Observable } from 'rxjs';
 
 const productsUrl = '/api/products';
 const suppliersUrl = '/api/suppliers';
+const sessionUrl = '/api/session';
 
 interface ProductsMetadata {
   data: Product[];
@@ -152,5 +154,18 @@ export class Repository {
         this.getProducts();
         this.getSuppliers();
       });
+  }
+
+  storeSessionData<T>(dataType: string, data: T) {
+    return this
+      .http
+      .post(`${sessionUrl}/${dataType}`, data)
+      .subscribe(response => { });
+  }
+
+  getSessionData<T>(dataType: string): Observable<T> {
+    return this
+      .http
+      .get<T>(`${sessionUrl}/${dataType}`);
   }
 }
