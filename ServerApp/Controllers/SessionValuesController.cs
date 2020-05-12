@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ServerApp.Infrastructure;
 using ServerApp.Models;
+using ServerApp.Models.BindingTargets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,16 @@ namespace ServerApp.Controllers
         {
             var jsonData = CustomJsonSerializer.Serialize(products);
             HttpContext.Session.SetString("cart", jsonData);
+        }
+
+        [HttpGet("checkout")]
+        public IActionResult GetCheckout() => Ok(HttpContext.Session.GetString("checkout"));
+
+        [HttpPost("checkout")]
+        public void StoreCheckout([FromBody] CheckoutState checkoutState)
+        {
+            var jsonData = CustomJsonSerializer.Serialize(checkoutState);
+            HttpContext.Session.SetString("checkout", jsonData);
         }
     }
 }
