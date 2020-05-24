@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using ServerApp.Models;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 
 namespace ServerApp
 {
@@ -65,6 +67,7 @@ namespace ServerApp
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseWebAssemblyDebugging();
             }
             else
             {
@@ -74,6 +77,12 @@ namespace ServerApp
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                RequestPath = "/blazor",
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "../BlazorApp/wwwroot"))
+            });
 
             app.UseSession();
 
@@ -93,7 +102,11 @@ namespace ServerApp
                     pattern: "{target:regex(store|cart|checkout)}/{*catchall}",
                     defaults: new { controller = "Home", action = "Index" }
                 );
+
+                endpoints.MapFallbackToFile("blazor/{*path:nonfile}", "index.html");
             });
+
+            app.Map("/blazor", opts => opts.UseBlazorFrameworkFiles());
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
