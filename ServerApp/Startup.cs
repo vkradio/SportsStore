@@ -103,7 +103,13 @@ namespace ServerApp
                     defaults: new { controller = "Home", action = "Index" }
                 );
 
-                endpoints.MapFallbackToFile("blazor/{*path:nonfile}", "index.html");
+                endpoints.MapControllerRoute(
+                    name: "blazor_integration",
+                    pattern: "/blazor/{*path:nonfile}",
+                    defaults: new { controller = "Home", action = "Blazor" }
+                );
+
+                //endpoints.MapFallbackToFile("blazor/{*path:nonfile}", "index.html");
             });
 
             app.Map("/blazor", opts => opts.UseBlazorFrameworkFiles());

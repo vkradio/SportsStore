@@ -13,25 +13,15 @@ namespace ServerApp.Controllers
     {
         readonly DataContext context;
 
-        public HomeController(DataContext ctx)
-        {
-            context = ctx;
-        }
+        public HomeController(DataContext ctx) => context = ctx;
 
-        public IActionResult Index()
-        {
-            return View(context.Products.First());
-        }
+        public IActionResult Index() => View(context.Products.First());
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Blazor() => View();
+
+        public IActionResult Privacy() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
