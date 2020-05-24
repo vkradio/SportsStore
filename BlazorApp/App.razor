@@ -1,10 +1,40 @@
-<Router AppAssembly="@typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-    </Found>
-    <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p>Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+@inject HttpClient http
+
+<div class="p-2 bg-info text-white">
+    <EditForm Model="@search" OnValidSubmit="@HandleSearch" class="form-inline">
+        <InputText class="form-control" @bind-Value="@search.SearchTerm" placeholder="Enter search term" />
+        <button type="submit" class="btn btn-primary m-1">Search</button>
+        <span class="ml-3">@results</span>
+    </EditForm>
+</div>
+
+@code {
+    const string productsUrl = "/api/products";
+    readonly SearchSettings search = new SearchSettings();
+    string results = "No results to display";
+
+    async void HandleSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(search.SearchTerm))
+        {
+            var products = await http.GetFromJsonAsync<Product[]>($"{productsUrl}/?search={search.SearchTerm}");
+            var totalPrice = products
+                .Select(p => p.Price)
+                .Sum();
+
+            results = $"{products.Length} products, total price is ${totalPrice}";
+
+            StateHasChanged();
+        }
+    }
+
+    class Product
+    {
+        public decimal Price { get; set; }
+    }
+
+    class SearchSettings
+    {
+        public string SearchTerm { get; set; } = default!;
+    }
+}

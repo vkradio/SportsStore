@@ -113,6 +113,7 @@ namespace ServerApp
             });
 
             app.Map("/blazor", opts => opts.UseBlazorFrameworkFiles());
+            app.UseBlazorFrameworkFiles();
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
