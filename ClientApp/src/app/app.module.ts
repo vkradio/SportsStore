@@ -10,6 +10,7 @@ import { ModelModule } from './models/model.module';
 // import { ProductDetailComponent } from './structure/productDetail.component';
 import { FormsModule } from '@angular/forms';
 import { StoreModule } from './store/store.module';
+import { ExternalService } from './external.service';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,9 @@ import { StoreModule } from './store/store.module';
     FormsModule,
     StoreModule
   ],
-  providers: [],
+  providers: [ExternalService],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(external: ExternalService) { }
+}

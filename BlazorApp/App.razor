@@ -1,4 +1,4 @@
-@inject HttpClient http
+@inject IJSRuntime js
 
 <div class="p-2 bg-info text-white">
     <EditForm Model="@search" OnValidSubmit="@HandleSearch" class="form-inline">
@@ -9,7 +9,6 @@
 </div>
 
 @code {
-    const string productsUrl = "/api/products";
     readonly SearchSettings search = new SearchSettings();
     string results = "No results to display";
 
@@ -17,7 +16,7 @@
     {
         if (!string.IsNullOrWhiteSpace(search.SearchTerm))
         {
-            var products = await http.GetFromJsonAsync<Product[]>($"{productsUrl}/?search={search.SearchTerm}");
+            var products = await js.InvokeAsync<Product[]>("angular_searchProducts", search.SearchTerm);
             var totalPrice = products
                 .Select(p => p.Price)
                 .Sum();
