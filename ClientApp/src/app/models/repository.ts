@@ -38,7 +38,7 @@ export class Repository {
     console.log('request');
   }
 
-  getProducts(related = false) {
+  async getProducts() {
     let url = `${productsUrl}?related=${this.filter.related}`;
     if (this.filter.category) {
       url += `&category=${this.filter.category}`;
@@ -48,13 +48,13 @@ export class Repository {
     }
     url += '&metadata=true';
 
-    this
+    const md = await this
       .http
       .get<ProductsMetadata>(url)
-      .subscribe(md => {
-        this.products = md.data;
-        this.categories = md.categories;
-      });
+      .toPromise<ProductsMetadata>();
+    this.products = md.data;
+    this.categories = md.categories;
+    return md;
   }
 
   getSuppliers() {

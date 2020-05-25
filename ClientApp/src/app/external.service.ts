@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Repository } from './models/repository';
 import { Product } from './models/product.model';
 
@@ -6,16 +6,14 @@ const globalFuncSearch = 'angular_searchProducts';
 
 @Injectable()
 export class ExternalService {
-  constructor(private repo: Repository) {
+  constructor(private repo: Repository, private zone: NgZone) {
     window[globalFuncSearch] = this.doSearch.bind(this);
   }
 
-  doSearch(searchTerm: string) {
-    const lowerTerm = searchTerm.toLowerCase();
-    return this
-      .repo
-      .products
-      .filter(p => p.name.toLowerCase().includes(lowerTerm) ||
-                   p.description.toLowerCase().includes(lowerTerm));
+  async doSearch(searchTerm: string) {
+    return this.zone.run(async () => {
+      this.repo.filter.search = searchTerm;
+      return (await this.repo.getProducts()).data;
+    });
   }
 }
