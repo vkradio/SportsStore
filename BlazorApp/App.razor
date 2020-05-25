@@ -12,6 +12,8 @@
     readonly SearchSettings search = new SearchSettings();
     string results = "No results to display";
 
+    protected override void OnAfterRender(bool firstRender) => js.InvokeAsync<object>("angular_receiveReference", DotNetObjectReference.Create(this));
+
     async void HandleSearch()
     {
         if (!string.IsNullOrWhiteSpace(search.SearchTerm))
@@ -25,6 +27,14 @@
 
             StateHasChanged();
         }
+    }
+
+    [JSInvokable]
+    public void ResetSearch(string message)
+    {
+        search.SearchTerm = string.Empty;
+        results = message;
+        StateHasChanged();
     }
 
     class Product
