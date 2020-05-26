@@ -1,5 +1,5 @@
 # SportsStore
-Educational project based on Freeman's book on Angular + ASP.NET Core MVC 3
+Educational project based on Freeman's book [Essential Angular for ASP.NET Core MVC 3](https://www.apress.com/gp/book/9781484252833)
 
 Differences compared to the original textbook:
 * C# 8 Nullable Reference Types;
