@@ -35,7 +35,6 @@ namespace ServerApp.Controllers
         {
             var product = context
                 .Products
-                .AsNoTracking()
                 .Include(p => p.Supplier!) // See https://docs.microsoft.com/en-us/ef/core/miscellaneous/nullable-reference-types#navigating-and-including-nullable-relationships
                     .ThenInclude(s => s.Products)
                 .Include(p => p.Ratings)
