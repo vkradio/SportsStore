@@ -26,7 +26,6 @@ export class ProductAdminComponent {
       this.repo.replaceProduct(this.repo.product);
     }
     this.clearProduct();
-    // this.tableMode = true;
   }
 
   deleteProduct(id: number) {
