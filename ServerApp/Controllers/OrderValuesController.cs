@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ServerApp.Models;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 namespace ServerApp.Controllers
 {
     [Route("/api/orders")]
+    [Authorize(Roles = "Administrator")]
     [ApiController]
     public class OrderValuesController : Controller
     {
@@ -57,6 +59,7 @@ namespace ServerApp.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult CreateOrder([FromBody] Order order)
         {
             if (ModelState.IsValid)

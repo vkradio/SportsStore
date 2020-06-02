@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -34,6 +35,11 @@ namespace ServerApp
             var connectionString = Configuration["ConnectionStrings:DefaultConnection"];
 
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddDbContext<IdentityDataContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:Identity"]));
+            services
+                .AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<IdentityDataContext>();
 
             services
                 .AddControllersWithViews()
@@ -87,7 +93,7 @@ namespace ServerApp
             app.UseSession();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -136,6 +142,7 @@ namespace ServerApp
             });
 
             SeedData.SeedDatabase(services.GetRequiredService<DataContext>());
+            IdentitySeedData.SeedDatabase(services).Wait();
         }
     }
 }

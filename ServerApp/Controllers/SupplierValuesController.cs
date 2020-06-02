@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ServerApp.Models;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace ServerApp.Controllers
 {
     [Route("api/suppliers")]
+    [Authorize(Roles = "Administrator")]
     public class SupplierValuesController : Controller
     {
         readonly DataContext context;
