@@ -1,10 +1,14 @@
+using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -15,6 +19,7 @@ using ServerApp.Models;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 
 namespace ServerApp
 {
@@ -65,11 +70,15 @@ namespace ServerApp
                 options.Cookie.HttpOnly = false;
                 options.Cookie.IsEssential = true;
             });
+
+            services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services, IAntiforgery antiforgery)
         {
+            Guard.Against.Null(app, nameof(app));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -95,6 +104,29 @@ namespace ServerApp
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.Use(nextDelegate => context =>
+            {
+                var path = context.Request.Path.Value;
+                string[] directUrls = { "/admin", "/store", "/cart", "checkout" };
+                if (path.StartsWith("/api", StringComparison.InvariantCultureIgnoreCase) ||
+                    string.Equals("/", path, StringComparison.InvariantCultureIgnoreCase) ||
+                    directUrls.Any(url => path.StartsWith(url, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    var tokens = antiforgery.GetAndStoreTokens(context);
+                    context.Response.Cookies.Append(
+                        "XSRF-TOKEN",
+                        tokens.RequestToken,
+                        new CookieOptions
+                        {
+                            HttpOnly = false,
+                            Secure = false,
+                            IsEssential = true
+                        }
+                    );
+                }
+                return nextDelegate(context);
+            });
 
             app.UseEndpoints(endpoints =>
             {
