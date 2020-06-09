@@ -25,16 +25,29 @@ namespace ServerApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            Guard.Against.Null(env, nameof(env));
+
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(Environment
+                    .GetCommandLineArgs()
+                    .Skip(1)
+                    .ToArray()
+                );
+
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Not compatible with ASP.NET MVC convention over configuration principle")]
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration["ConnectionStrings:DefaultConnection"];
@@ -51,10 +64,10 @@ namespace ServerApp
                 .AddJsonOptions(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; })
                 .AddNewtonsoftJson();
 
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "SportsStore API", Version = "v1" });
-            });
+            //services.AddSwaggerGen(options =>
+            //{
+            //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "SportsStore API", Version = "v1" });
+            //});
 
             services.AddDistributedSqlServerCache(options =>
             {
@@ -74,10 +87,18 @@ namespace ServerApp
             services.AddAntiforgery(options => options.HeaderName = "X-XSRF-TOKEN");
         }
 
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider services, IAntiforgery antiforgery)
+        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "It will overcomplicate if we'll put those 2 strings into resources")]
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
+            IServiceProvider services,
+            IAntiforgery antiforgery,
+            IHostApplicationLifetime lifetime)
         {
             Guard.Against.Null(app, nameof(app));
+            Guard.Against.Null(lifetime, nameof(lifetime));
 
             if (env.IsDevelopment())
             {
@@ -97,6 +118,11 @@ namespace ServerApp
             {
                 RequestPath = "/blazor",
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "../BlazorApp/wwwroot"))
+            });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                RequestPath = "",
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "./wwwroot/app"))
             });
 
             app.UseSession();
@@ -150,31 +176,37 @@ namespace ServerApp
                 //endpoints.MapFallbackToFile("blazor/{*path:nonfile}", "index.html");
             });
 
-            app.Map("/blazor", opts => opts.UseBlazorFrameworkFiles());
+            //app.Map("/blazor", opts => opts.UseBlazorFrameworkFiles());
             app.UseBlazorFrameworkFiles();
 
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsStore API");
-            });
+            //app.UseSwagger();
+            //app.UseSwaggerUI(options =>
+            //{
+            //    options.SwaggerEndpoint("/swagger/v1/swagger.json", "SportsStore API");
+            //});
 
-            app.UseSpa(spa =>
-            {
-                var strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
-                if (strategy == "proxy")
-                {
-                    spa.UseProxyToSpaDevelopmentServer("http://127.0.0.1:4200");
-                }
-                else
-                {
-                    spa.Options.SourcePath = "../ClientApp";
-                    spa.UseAngularCliServer("start");
-                }
-            });
+            //app.UseSpa(spa =>
+            //{
+            //    var strategy = Configuration.GetValue<string>("DevTools:ConnectionStrategy");
+            //    if (strategy == "proxy")
+            //    {
+            //        spa.UseProxyToSpaDevelopmentServer("http://127.0.0.1:4200");
+            //    }
+            //    else
+            //    {
+            //        spa.Options.SourcePath = "../ClientApp";
+            //        spa.UseAngularCliServer("start");
+            //    }
+            //});
 
-            SeedData.SeedDatabase(services.GetRequiredService<DataContext>());
-            IdentitySeedData.SeedDatabase(services).Wait();
+            if ((Configuration["INITDB"] ?? "false") == "true")
+            {
+                Console.WriteLine("Preparing Database...");
+                SeedData.SeedDatabase(services.GetRequiredService<DataContext>());
+                IdentitySeedData.SeedDatabase(services).Wait();
+                Console.WriteLine("Database Preparation Complete");
+                lifetime.StopApplication();
+            }
         }
     }
 }
