@@ -10,6 +10,7 @@ const productsUrl = '/api/products';
 const suppliersUrl = '/api/suppliers';
 const sessionUrl = '/api/session';
 const ordersUrl = '/api/orders';
+const loginUrl = '/api/account/';
 
 interface ProductsMetadata {
   data: Product[];
@@ -200,5 +201,18 @@ export class Repository {
       .http
       .post(`${ordersUrl}/${order.orderId}`, {})
       .subscribe(() => this.getOrders());
+  }
+
+  login(name: string, password: string) {
+    return this
+      .http
+      .post<boolean>(`${loginUrl}login`, { name, password });
+  }
+
+  logout() {
+    this
+      .http
+      .post(`${loginUrl}logout`, null)
+      .subscribe(response => { });
   }
 }
